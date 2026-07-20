@@ -1,26 +1,247 @@
 @import "tailwindcss";
 
+/* Next.js App Router */
+@source "../app";
+@source "../components";
+@source "../assets";
+
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Cherry Noble School design system */
+
+
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.875rem;
+
+  --cherry: oklch(0.58 0.18 18);
+  --cherry-deep: oklch(0.38 0.13 18);
+
+  --cream: oklch(0.94 0.025 75);
+  --cream-soft: oklch(0.98 0.012 80);
+
+  --ink: oklch(0.22 0.02 30);
+
+  --background: var(--cream-soft);
+  --foreground: var(--ink);
+
+  --card: white;
+  --card-foreground: var(--ink);
+
+  --popover: white;
+  --popover-foreground: var(--ink);
+
+  --primary: var(--cherry-deep);
+  --primary-foreground: var(--cream-soft);
+
+  --secondary: var(--cream);
+  --secondary-foreground: var(--cherry-deep);
+
+  --muted: oklch(0.96 0.012 75);
+  --muted-foreground: oklch(0.45 0.02 30);
+
+  --accent: var(--cherry);
+  --accent-foreground: var(--cream-soft);
+
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: var(--cream-soft);
+
+  --border: oklch(0.88 0.02 60);
+  --input: oklch(0.88 0.02 60);
+
+  --ring: var(--cherry);
+}
+
+.dark {
+  --background: oklch(0.18 0.03 25);
+  --foreground: var(--cream-soft);
+
+  --card: oklch(0.24 0.03 25);
+  --card-foreground: var(--cream-soft);
+
+  --popover: oklch(0.24 0.03 25);
+  --popover-foreground: var(--cream-soft);
+
+  --primary: oklch(0.7 0.16 18);
+  --primary-foreground: oklch(0.18 0.03 25);
+
+  --secondary: oklch(0.3 0.03 25);
+  --secondary-foreground: var(--cream-soft);
+
+  --muted: oklch(0.28 0.03 25);
+  --muted-foreground: oklch(0.7 0.02 30);
+
+  --accent: var(--cherry);
+  --accent-foreground: var(--cream-soft);
+
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+
+  --ring: var(--cherry);
 }
 
 @theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-cherry: var(--cherry);
+  --color-cherry-deep: var(--cherry-deep);
+  --color-cream: var(--cream);
+  --color-cream-soft: var(--cream-soft);
+  --color-ink: var(--ink);
+
+  --shadow-warm: 0 20px 60px -20px
+    color-mix(in oklab, var(--cherry-deep) 35%, transparent);
+
+  --shadow-soft: 0 8px 30px -12px
+    color-mix(in oklab, var(--ink) 18%, transparent);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility container-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+
+  padding: .85rem 1.5rem;
+
+  border-radius: 9999px;
+
+  background: var(--cherry-deep);
+  color: var(--cream-soft);
+
+  font-weight: 500;
+
+  box-shadow: var(--shadow-warm);
+
+  transition: .2s;
+
+  &:hover {
+    background: var(--cherry);
+    transform: translateY(-2px);
+  }
+}
+
+@utility btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+
+  padding: .85rem 1.5rem;
+
+  border-radius: 9999px;
+
+  border: 1px solid color-mix(in oklab, var(--cherry-deep) 30%, transparent);
+
+  color: var(--cherry-deep);
+
+  font-weight: 500;
+
+  transition: .2s;
+
+  &:hover {
+    background: var(--cream);
+  }
+}
+
+@utility eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+
+  font-size: .75rem;
+  font-weight: 600;
+
+  letter-spacing: .18em;
+  text-transform: uppercase;
+
+  color: var(--cherry);
+}
+
+@utility surface-cream {
+  background: var(--cream);
+  color: var(--ink);
 }

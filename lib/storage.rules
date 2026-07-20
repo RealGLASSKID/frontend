@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// Same caveat as firestore.rules: "authenticated" here means an anonymous
+// Firebase Auth session established via lib/firebase-auth-bridge.ts when
+// the hardcoded admin/admin123 login succeeds — not a verified admin
+// identity. See the comment at the top of firestore.rules for details.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Gallery images: public read (shown on the public site), admin-only
+    // upload/delete. Capped at 10MB per file and images only.
+    match /gallery/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches("image/.*");
+    }
+
+    // School logo: public read, admin-only upload.
+    match /settings/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches("image/.*");
+    }
+
+    // Deny everything else by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
