@@ -24,6 +24,9 @@ const NEWS_CATEGORIES: NewsCategory[] = [
   "Announcement",
   "Event",
   "Achievement",
+  "Community",
+  "Notice",
+  "Sports",
   "Admissions",
 ];
 
@@ -31,12 +34,18 @@ interface NewsFormValues {
   title: string;
   summary: string;
   category: NewsCategory;
+  date: string;
+}
+
+function getTodayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 const EMPTY_FORM_VALUES: NewsFormValues = {
   title: "",
   summary: "",
   category: "Announcement",
+  date: getTodayIsoDate(),
 };
 
 export default function NewsManager() {
@@ -77,7 +86,7 @@ export default function NewsManager() {
 
   const openAddForm = (): void => {
     setEditingId(null);
-    setFormValues(EMPTY_FORM_VALUES);
+    setFormValues({ ...EMPTY_FORM_VALUES, date: getTodayIsoDate() });
     setIsFormOpen(true);
   };
 
@@ -87,6 +96,7 @@ export default function NewsManager() {
       title: item.title,
       summary: item.summary,
       category: item.category,
+      date: item.date,
     });
     setIsFormOpen(true);
   };
@@ -109,6 +119,7 @@ export default function NewsManager() {
           title: formValues.title.trim(),
           summary: formValues.summary.trim(),
           category: formValues.category,
+          date: formValues.date,
         });
       } else {
         await addNewsPost({
@@ -116,7 +127,7 @@ export default function NewsManager() {
           summary: formValues.summary.trim(),
           category: formValues.category,
           isPublished: false,
-          date: new Date().toISOString().slice(0, 10),
+          date: formValues.date,
         });
       }
       closeForm();
@@ -222,24 +233,48 @@ export default function NewsManager() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <label
-              htmlFor="news-summary"
-              className="mb-2 block text-sm font-medium text-primary"
-            >
-              Summary
-            </label>
-            <textarea
-              id="news-summary"
-              value={formValues.summary}
-              onChange={(event) =>
-                setFormValues((previous) => ({ ...previous, summary: event.target.value }))
-              }
-              placeholder="A short summary shown on the public news page (1-3 sentences)."
-              rows={3}
-              className="w-full rounded-2xl border border-border/40 bg-background px-4 py-3 text-sm text-primary outline-none transition-all duration-300 focus:border-primary"
-              required
-            />
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label
+                htmlFor="news-summary"
+                className="mb-2 block text-sm font-medium text-primary"
+              >
+                Summary
+              </label>
+              <textarea
+                id="news-summary"
+                value={formValues.summary}
+                onChange={(event) =>
+                  setFormValues((previous) => ({ ...previous, summary: event.target.value }))
+                }
+                placeholder="A short summary shown on the public news page (1-3 sentences)."
+                rows={3}
+                className="w-full rounded-2xl border border-border/40 bg-background px-4 py-3 text-sm text-primary outline-none transition-all duration-300 focus:border-primary"
+                required
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="news-date"
+                className="mb-2 block text-sm font-medium text-primary"
+              >
+                Date
+              </label>
+              <input
+                id="news-date"
+                type="date"
+                value={formValues.date}
+                onChange={(event) =>
+                  setFormValues((previous) => ({ ...previous, date: event.target.value }))
+                }
+                className="w-full rounded-full border border-border/40 bg-background px-4 py-2.5 text-sm text-primary outline-none transition-all duration-300 focus:border-primary"
+                required
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Defaults to today. Change this to backdate a post to when it actually happened.
+              </p>
+            </div>
           </div>
 
           <div className="mt-5 flex items-center gap-3">

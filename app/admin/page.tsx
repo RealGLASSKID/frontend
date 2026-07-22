@@ -15,7 +15,7 @@ export interface AdminSession {
   signedInAt: string;
 }
 
-export default function AdminPage(): JSX.Element {
+export default function AdminPage() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [isCheckingSession, setIsCheckingSession] = useState<boolean>(true);
   const [loginError, setLoginError] = useState<string>("");

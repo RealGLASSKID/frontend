@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Calendar, ArrowRight } from "lucide-react";
 import { subscribeToPublishedNews } from "@/lib/services/news";
 import type { NewsPost } from "@/app/admin/components/types";
 
@@ -38,39 +39,65 @@ export default function News() {
 
   return (
     <main className="pt-16">
-      <section className="container mx-auto px-6 py-20">
-        <h1 className="text-5xl font-bold mb-4">News &amp; Events</h1>
-        <p className="text-xl text-gray-600">What&apos;s happening on campus.</p>
+      <section className="container-page py-16">
+        <span className="eyebrow">What's happening</span>
+        <h1 className="mt-3 font-display text-5xl text-primary md:text-6xl">
+          News &amp; Events
+        </h1>
+        <p className="mt-3 text-lg text-muted-foreground">
+          What's happening on campus.
+        </p>
       </section>
 
-      <section className="container mx-auto px-6 pb-20">
+      <section className="container-page pb-24">
         {isLoading ? (
           <div className="flex justify-center py-16">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         ) : errorMessage ? (
-          <p className="text-center text-gray-500">{errorMessage}</p>
+          <p className="text-center text-muted-foreground">{errorMessage}</p>
         ) : newsItems.length === 0 ? (
-          <p className="text-center text-gray-500">
+          <p className="text-center text-muted-foreground">
             No news posts yet. Check back soon.
           </p>
         ) : (
-          <div className="grid md:grid-cols-2 gap-8">
-            {newsItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white border rounded-3xl p-8 hover:shadow-lg transition"
-              >
-                <div className="uppercase text-xs tracking-widest text-amber-600 mb-2">
-                  {item.category}
-                </div>
-                <div className="text-sm text-gray-500 mb-4">
-                  {formatDisplayDate(item.date)}
-                </div>
-                <h3 className="text-2xl font-semibold mb-4">{item.title}</h3>
-                <p className="text-gray-600">{item.summary}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {newsItems.map((item, index) => {
+              const isFeatured = index === 0;
+
+              return (
+                <article
+                  key={item.id}
+                  className={`rounded-[2rem] p-8 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-warm ${
+                    isFeatured ? "surface-cream md:col-span-2" : "bg-card"
+                  }`}
+                >
+                  <span className="inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
+                    {item.category}
+                  </span>
+
+                  <div className="mt-4 flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDisplayDate(item.date)}
+                  </div>
+
+                  <h3
+                    className={`mt-4 font-display leading-tight text-primary ${
+                      isFeatured ? "text-3xl md:text-4xl" : "text-2xl"
+                    }`}
+                  >
+                    {item.title}
+                  </h3>
+
+                  <p className="mt-3 text-muted-foreground">{item.summary}</p>
+
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-all duration-300 hover:gap-2.5">
+                    Read more
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>

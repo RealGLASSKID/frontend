@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Lock, User, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
 
 export interface LoginFormProps {
-  onLogin: (username: string, password: string) => void;
+  onLogin: (username: string, password: string) => void | Promise<void>;
   errorMessage: string;
   onClearError: () => void;
 }
@@ -19,10 +19,10 @@ export default function LoginForm({
   const [password, setPassword] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     setIsSubmitting(true);
-    onLogin(username.trim(), password);
+    await onLogin(username.trim(), password);
     setIsSubmitting(false);
   };
 

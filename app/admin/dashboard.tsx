@@ -17,10 +17,10 @@ export interface DashboardProps {
   onSignOut: () => void;
 }
 
-export default function Dashboard({ session, onSignOut }: DashboardProps){
+export default function Dashboard({ session, onSignOut }: DashboardProps) {
   const [activeSection, setActiveSection] = useState<AdminSection>("overview");
 
-  const renderActiveSection = ()=> {
+  const renderActiveSection = () => {
     switch (activeSection) {
       case "overview":
         return <Overview onNavigate={setActiveSection} />;

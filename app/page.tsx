@@ -14,6 +14,7 @@ import {
 import hero from "@/assets/hero-students.jpg";
 import playground from "@/assets/playground.jpg";
 import reading from "@/assets/student-reading.jpg";
+import HeroNewsBadge from "@/components/HeroNewsBadge";
 
 export const metadata: Metadata = {
   title: "Cherry Noble School (C.N.S) — Where Curious Minds Bloom",
@@ -72,12 +73,7 @@ export default function HomePage() {
               />
             </div>
 
-            <div className="absolute -bottom-8 -left-6 hidden w-56 rounded-3xl border border-border/60 bg-card p-5 shadow-soft md:block">
-              <p className="eyebrow">Today at C.N.S</p>
-              <p className="mt-2 font-display text-xl leading-tight text-primary">
-                Inter-house spelling bee finals 🐝
-              </p>
-            </div>
+            <HeroNewsBadge />
 
             <div className="absolute -right-4 -top-6 hidden items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground shadow-warm md:flex">
               <Sparkles className="h-4 w-4" />

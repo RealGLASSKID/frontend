@@ -6,7 +6,14 @@ export type AdminSection =
   | "admissions"
   | "settings";
 
-export type NewsCategory = "Announcement" | "Event" | "Achievement" | "Admissions";
+export type NewsCategory =
+  | "Announcement"
+  | "Event"
+  | "Achievement"
+  | "Community"
+  | "Notice"
+  | "Sports"
+  | "Admissions";
 
 export interface NewsPost {
   id: string;
