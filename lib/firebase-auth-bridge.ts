@@ -5,31 +5,22 @@ import {
   type User,
   type AuthError,
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { getFirebaseAuth } from "@/lib/firebase";
 
-/**
- * Sign in with real Firebase Email/Password Auth.
- * Create the admin user in Firebase Console → Authentication → Users
- * (or use createUserWithEmailAndPassword once during setup).
- */
 export async function signInWithEmail(
   email: string,
   password: string
 ): Promise<User> {
+  const auth = getFirebaseAuth();
   const credential = await signInWithEmailAndPassword(auth, email, password);
   return credential.user;
 }
 
-/**
- * Sign out of Firebase Auth.
- */
 export async function signOutAdminSession(): Promise<void> {
+  const auth = getFirebaseAuth();
   await signOut(auth);
 }
 
-/**
- * Get a human-readable error message from Firebase Auth errors.
- */
 export function getAuthErrorMessage(error: unknown): string {
   const authError = error as AuthError;
   const code = authError?.code || "";
@@ -51,23 +42,30 @@ export function getAuthErrorMessage(error: unknown): string {
       return "Network error. Check your connection and try again.";
     case "auth/missing-password":
       return "Password is required.";
+    case "auth/invalid-api-key":
+      return "Firebase API key is missing or invalid. Check your environment variables.";
     default:
       return authError?.message || "Sign in failed. Please try again.";
   }
 }
 
-/**
- * Subscribe to auth state changes. Useful for protecting the dashboard.
- */
 export function onAdminAuthStateChanged(
   callback: (user: User | null) => void
 ): () => void {
-  return onAuthStateChanged(auth, callback);
+  try {
+    const auth = getFirebaseAuth();
+    return onAuthStateChanged(auth, callback);
+  } catch {
+    // Config missing at build/prerender time
+    callback(null);
+    return () => {};
+  }
 }
 
-/**
- * Returns the current Firebase user (or null).
- */
 export function getCurrentUser(): User | null {
-  return auth.currentUser;
+  try {
+    return getFirebaseAuth().currentUser;
+  } catch {
+    return null;
+  }
 }

@@ -11,19 +11,63 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Reuse existing app instance in dev (Next.js hot reload)
-const firebaseApp: FirebaseApp =
-  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-
-export const auth: Auth = getAuth(firebaseApp);
-export const db: Firestore = getFirestore(firebaseApp);
-
-export default firebaseApp;
-
-if (typeof window !== "undefined") {
-  console.log("Firebase config check:", {
-    apiKey: firebaseConfig.apiKey ? "present" : "MISSING",
-    authDomain: firebaseConfig.authDomain ? "present" : "MISSING",
-    projectId: firebaseConfig.projectId ? "present" : "MISSING",
-  });
+function isConfigValid(): boolean {
+  return Boolean(
+    firebaseConfig.apiKey &&
+      firebaseConfig.authDomain &&
+      firebaseConfig.projectId &&
+      firebaseConfig.appId
+  );
 }
+
+let firebaseApp: FirebaseApp | null = null;
+let authInstance: Auth | null = null;
+let dbInstance: Firestore | null = null;
+
+export function getFirebaseApp(): FirebaseApp {
+  if (firebaseApp) return firebaseApp;
+
+  if (!isConfigValid()) {
+    throw new Error(
+      "Firebase is not configured. Set NEXT_PUBLIC_FIREBASE_* env vars in .env.local and on Vercel."
+    );
+  }
+
+  firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  return firebaseApp;
+}
+
+export function getFirebaseAuth(): Auth {
+  if (authInstance) return authInstance;
+  authInstance = getAuth(getFirebaseApp());
+  return authInstance;
+}
+
+export function getFirebaseDb(): Firestore {
+  if (dbInstance) return dbInstance;
+  dbInstance = getFirestore(getFirebaseApp());
+  return dbInstance;
+}
+
+// Lazy proxies so SSR/prerender does not crash when env is missing at build time
+export const auth = new Proxy({} as Auth, {
+  get(_target, prop) {
+    const real = getFirebaseAuth();
+    const value = (real as unknown as Record<string | symbol, unknown>)[prop];
+    return typeof value === "function" ? (value as Function).bind(real) : value;
+  },
+});
+
+export const db = new Proxy({} as Firestore, {
+  get(_target, prop) {
+    const real = getFirebaseDb();
+    const value = (real as unknown as Record<string | symbol, unknown>)[prop];
+    return typeof value === "function" ? (value as Function).bind(real) : value;
+  },
+});
+
+export default {
+  get app() {
+    return getFirebaseApp();
+  },
+};
