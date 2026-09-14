@@ -1,25 +1,73 @@
-import { getAuth, signInAnonymously, signOut, type Auth } from "firebase/auth";
-import firebaseApp from "@/lib/firebase";
-
-const auth: Auth = getAuth(firebaseApp);
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  type User,
+  type AuthError,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 /**
- * Signs into Firebase Auth anonymously. This does NOT verify who the
- * person is — it only gives Firestore/Storage security rules something
- * to check (`request.auth != null`) so writes aren't wide open to every
- * unauthenticated request on the internet.
- *
- * Call this immediately after the hardcoded admin/admin123 check in
- * app/admin/page.tsx succeeds.
+ * Sign in with real Firebase Email/Password Auth.
+ * Create the admin user in Firebase Console → Authentication → Users
+ * (or use createUserWithEmailAndPassword once during setup).
  */
-export async function signInAdminSession(): Promise<void> {
-  await signInAnonymously(auth);
+export async function signInWithEmail(
+  email: string,
+  password: string
+): Promise<User> {
+  const credential = await signInWithEmailAndPassword(auth, email, password);
+  return credential.user;
 }
 
 /**
- * Ends the Firebase Auth session. Call this from the sign-out handler in
- * app/admin/page.tsx alongside clearing the local session.
+ * Sign out of Firebase Auth.
  */
 export async function signOutAdminSession(): Promise<void> {
   await signOut(auth);
+}
+
+/**
+ * Get a human-readable error message from Firebase Auth errors.
+ */
+export function getAuthErrorMessage(error: unknown): string {
+  const authError = error as AuthError;
+  const code = authError?.code || "";
+
+  switch (code) {
+    case "auth/invalid-email":
+      return "Please enter a valid email address.";
+    case "auth/user-disabled":
+      return "This account has been disabled. Contact the school administrator.";
+    case "auth/user-not-found":
+      return "No account found with this email.";
+    case "auth/wrong-password":
+      return "Incorrect password. Please try again.";
+    case "auth/invalid-credential":
+      return "Invalid email or password. Please try again.";
+    case "auth/too-many-requests":
+      return "Too many failed attempts. Please try again later.";
+    case "auth/network-request-failed":
+      return "Network error. Check your connection and try again.";
+    case "auth/missing-password":
+      return "Password is required.";
+    default:
+      return authError?.message || "Sign in failed. Please try again.";
+  }
+}
+
+/**
+ * Subscribe to auth state changes. Useful for protecting the dashboard.
+ */
+export function onAdminAuthStateChanged(
+  callback: (user: User | null) => void
+): () => void {
+  return onAuthStateChanged(auth, callback);
+}
+
+/**
+ * Returns the current Firebase user (or null).
+ */
+export function getCurrentUser(): User | null {
+  return auth.currentUser;
 }

@@ -1,17 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { User } from "firebase/auth";
 import LoginForm from "./components/LoginForm";
 import Dashboard from "./dashboard";
-import { signInAdminSession, signOutAdminSession } from "@/lib/firebase-auth-bridge";
+import {
+  signInWithEmail,
+  signOutAdminSession,
+  onAdminAuthStateChanged,
+  getAuthErrorMessage,
+} from "@/lib/firebase-auth-bridge";
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin123";
-const SESSION_KEY = "cns_admin_session";
 const SESSION_EVENT = "cns-admin-session-changed";
 
 export interface AdminSession {
-  username: string;
+  email: string;
+  uid: string;
+  displayName: string | null;
   signedInAt: string;
 }
 
@@ -21,57 +26,53 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState<string>("");
 
   useEffect(() => {
-    const storedSession = window.localStorage.getItem(SESSION_KEY);
-
-    if (storedSession) {
-      try {
-        const parsedSession = JSON.parse(storedSession) as AdminSession;
-        setSession(parsedSession);
-        // Firebase Auth persists anonymous sessions across reloads by
-        // default, but calling this again is safe — it resolves with the
-        // existing anonymous user instead of creating a new one.
-        void signInAdminSession();
-      } catch {
-        window.localStorage.removeItem(SESSION_KEY);
+    // Listen to real Firebase Auth state (persists across reloads)
+    const unsubscribe = onAdminAuthStateChanged((user: User | null) => {
+      if (user) {
+        const newSession: AdminSession = {
+          email: user.email || "",
+          uid: user.uid,
+          displayName: user.displayName,
+          signedInAt: new Date().toISOString(),
+        };
+        setSession(newSession);
+        window.dispatchEvent(new Event(SESSION_EVENT));
+      } else {
+        setSession(null);
       }
-    }
+      setIsCheckingSession(false);
+    });
 
-    setIsCheckingSession(false);
+    return () => unsubscribe();
   }, []);
 
-  const handleLogin = async (username: string, password: string): Promise<void> => {
-    const isValidUsername = username === ADMIN_USERNAME;
-    const isValidPassword = password === ADMIN_PASSWORD;
+  const handleLogin = async (email: string, password: string): Promise<void> => {
+    setLoginError("");
 
-    if (isValidUsername && isValidPassword) {
-      try {
-        await signInAdminSession();
-      } catch (error) {
-        setLoginError(
-          `Signed in, but couldn't establish a secure session: ${(error as Error).message}`
-        );
-        return;
-      }
+    try {
+      const user = await signInWithEmail(email.trim(), password);
 
       const newSession: AdminSession = {
-        username,
+        email: user.email || email,
+        uid: user.uid,
+        displayName: user.displayName,
         signedInAt: new Date().toISOString(),
       };
 
-      window.localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
       setSession(newSession);
-      setLoginError("");
       window.dispatchEvent(new Event(SESSION_EVENT));
-      return;
+    } catch (error) {
+      setLoginError(getAuthErrorMessage(error));
     }
-
-    setLoginError("Invalid credentials. Please try again.");
   };
 
-  const handleSignOut = (): void => {
-    window.localStorage.removeItem(SESSION_KEY);
+  const handleSignOut = async (): Promise<void> => {
+    try {
+      await signOutAdminSession();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
     setSession(null);
-    void signOutAdminSession();
     window.dispatchEvent(new Event(SESSION_EVENT));
   };
 

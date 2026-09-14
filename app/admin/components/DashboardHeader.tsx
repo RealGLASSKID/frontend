@@ -10,7 +10,7 @@ export default function DashboardHeader({
   session,
   onSignOut,
 }: DashboardHeaderProps) {
-  const displayEmail = `${session.username}@cns.edu`;
+  const displayEmail = session.email || session.displayName || "Admin";
 
   return (
     <header className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">

@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
-import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,18 +11,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Reuse the existing app instance in dev (Next.js hot reload) instead of
-// re-initializing on every module reload, which Firebase throws on.
+// Reuse existing app instance in dev (Next.js hot reload)
 const firebaseApp: FirebaseApp =
   getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
+export const auth: Auth = getAuth(firebaseApp);
 export const db: Firestore = getFirestore(firebaseApp);
-export const storage: FirebaseStorage = getStorage(firebaseApp);
 
 export default firebaseApp;
 
-console.log("Firebase config check:", {
-  apiKey: firebaseConfig.apiKey ? "present" : "MISSING",
-  authDomain: firebaseConfig.authDomain ? "present" : "MISSING",
-  projectId: firebaseConfig.projectId ? "present" : "MISSING",
-});
+if (typeof window !== "undefined") {
+  console.log("Firebase config check:", {
+    apiKey: firebaseConfig.apiKey ? "present" : "MISSING",
+    authDomain: firebaseConfig.authDomain ? "present" : "MISSING",
+    projectId: firebaseConfig.projectId ? "present" : "MISSING",
+  });
+}
